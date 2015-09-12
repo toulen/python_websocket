@@ -1,0 +1,110 @@
+<html>  
+<head>  
+<title>WebSocket</title>
+    <script src="jquey路径" type="text/javascript"></script>
+<script>  
+var socket;  
+   
+function init(username){
+  var host = "ws://localhost:11011/name/"+username;
+  try{  
+    socket = new WebSocket(host);  
+    socket.onopen    = function(msg){
+        log('您已经进入聊天室')
+    };
+    socket.onmessage = function(msg){
+        log(msg.data);
+    };
+    socket.onclose   = function(msg){
+        log("与服务器连接断开");
+    };
+  }catch(ex){
+      log(ex);
+  }
+  $(".sendInfo").focus();
+}  
+   
+function send(){  
+  var txt,msg;  
+  txt = $(".sendInfo");
+  msg = txt.val();
+  if(!msg){
+      alert("Message can not be empty");
+      return;
+  }
+  txt.val('');
+  txt.focus();  
+  try{
+        socket.send(msg);
+      $('.sayInfo').html(msg)
+//        log("我说："+msg);
+  } catch(ex){
+      log(ex);
+  }
+}  
+   
+window.onbeforeunload=function(){  
+    try{  
+        socket.send('quit');  
+        socket.close();  
+        socket=null;  
+    }  
+    catch(ex){  
+        log(ex);  
+    }  
+};  
+
+function nameok(){
+    var _name = $('input[name="username"]').val();
+    if(!_name){
+        alert('请给自己取个名字吧')
+    }else{
+        $('.firstStep').remove()
+        init(_name)
+    }
+}
+
+function log(msg){
+    $('.msgInfo .bd').append('<p>'+ msg +'</p>');
+
+    //动画
+    var _html = $('<div>',{'class':'showMsg'});
+    _html.html(msg);
+    $('.renBox').append(_html);
+    _html.animate({
+        'marginLeft':'-100%'
+    }, 10000, function(){
+        _html.remove()
+    })
+}
+function show(obj){
+    obj.fadeIn()
+}
+function onkey(event){ if(event.keyCode==13){ send(); } }  
+</script>
+<link href="/static/css/css.css" type="text/css" rel="stylesheet" />
+</head>  
+  
+  
+<body>
+<div class="renBox">
+    <!--<div class="ren">-->
+        <!--<span class="sayInfo"></span>-->
+        <!--<span class="renHead"></span>-->
+    <!--</div>-->
+</div>
+<div class="msgInfo">
+    <div class="hd">聊天记录</div>
+    <div class="bd"></div>
+</div>
+<div class="sendBox">
+    <textarea class="sendInfo"></textarea>
+    <button onclick="send()">发送</button>
+</div>
+</body>  
+<div class="firstStep">
+    <div class="firstName">
+        <input type="text" class="username" name="username" placeholder="给自己取一个响亮的名字！" /><input type="button" class="btn" onclick="nameok()" value="进入聊天" />
+    </div>
+</div>
+</html>  
